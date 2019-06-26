@@ -45,7 +45,7 @@ int main()
 				printf("%s", buf);
 			}
 		}
-		sleep(5);
+		sleep(2);
 	}
 	return 0;
 }
