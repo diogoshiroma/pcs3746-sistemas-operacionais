@@ -1,0 +1,35 @@
+#include <linux/linkage.h>
+#include <linux/module.h>
+
+#include <asm/barrier.h>
+#include <linux/list.h>
+#include <linux/sched.h>
+#include <linux/slab.h>
+#include <linux/wait.h>
+#include ​<asm/barrier.h>
+#include​ <linux/list.h>
+#include​ <linux/sched.h>
+#include​ <linux/slab.h>
+#include​ <linux/wait.h>
+
+int processlist(void)
+{
+    struct task_struct *task;
+    for_each_process(task)
+    {
+    printk("%s [%d]\n",task->comm , task->pid);
+    }
+
+    return 0;
+}
+
+void cleanup_module(void)
+{
+    printk(KERN_INFO "Cleaning Up.\n");
+}
+
+
+asmlinkage long sys_cfs(void)
+{
+	return pr_info("batata\n");
+}

@@ -1,5 +1,5 @@
 #include "stack.h"
-
+#include "cfs.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +11,8 @@ int main()
 {
 	int fd = open("/sys/kernel/sys_stack/count", O_RDONLY);
 	char stack_count[5];
-
-	while(1) {
+	
+	for(int i=0; i<10; i++) {
 		if (lseek(fd, 0, SEEK_SET)) {
 			perror("lseek");
 		} else {
@@ -21,11 +21,12 @@ int main()
 				perror("read");
 			} else {
 				stack_count[size] = 0;
-				printf("Stack item count: %s", stack_count);
 			}
 		}
-		printf("stack_pop: %ld\n", stack_pop());
+		stack_pop();
 		sleep(rand() % 5 + 1);
 	}
+	printf("CFS após POP\n");
+	cfs();
 	return 0;
 }
