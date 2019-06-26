@@ -7,13 +7,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "hello_world.h"
+#include <fcntl.h>
 
-#include "stack.h"
-
-#define len(_arr) ((int)((&_arr)[1] - _arr))
-
-static const char * const programs[] = { "/stack_push", "/stack_pop" };
 
 void panic(const char *msg)
 {
@@ -33,40 +28,24 @@ void mount_fs()
 
 int main()
 {
-	printf("Custom initramfs - Hello World syscall:\n");
-	hello_world();
 	mount_fs();
 
-	printf("Forking to run %d programs\n", len(programs));
+	int fd = open("/sys/kernel/last_interrupt", O_RDONLY);
+	char buf[200];
 
-	for (int i = 0; i < len(programs); i++) {
-		const char *path = programs[i];
-		pid_t pid = fork();
-		if (pid == -1) {
-			panic("fork");
-		} else if (pid) {
-			printf("Starting %s (pid = %d)\n", path, pid);
+	while(1) {
+		if (lseek(fd, 0, SEEK_SET)) {
+			perror("lseek");
 		} else {
-			execl(path, path, (char *)NULL);
-			panic("execl");
+			int size = read(fd, buf, 150);
+			if (size < 0) {
+				perror("read");
+			} else {
+				buf[size] = 0;
+				printf("%s", buf);
+			}
 		}
+		sleep(5);
 	}
-
-	int program_count = len(programs);
-	while (program_count) {
-		int wstatus;
-		pid_t pid = wait(&wstatus);
-		if (WIFEXITED(wstatus))
-			printf("pid %d exited with %d\n", pid, WEXITSTATUS(wstatus));
-		else if (WIFSIGNALED(wstatus))
-			printf("pid %d killed by signal %d\n", pid, WTERMSIG(wstatus));
-		else
-			continue;
-		program_count--;
-	}
-
-	printf("init finished\n");
-	for (;;)
-		sleep(1000);
 	return 0;
 }
